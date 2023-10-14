@@ -20,6 +20,7 @@ public class ObstacleAvoidance : MonoBehaviour
     private Vector3 direction;
     private Quaternion targetRotation;
 
+    public LayerMask mask;
     // Use this for initialization
     void Start () 
     {
@@ -78,6 +79,22 @@ public class ObstacleAvoidance : MonoBehaviour
 
     private void ApplyAvoidance(ref Vector3 direction)
     {
+        //Add a layer mask that detect only a layer
+        //0000 0000 0000 0000 0000 0001 0000 0000
+        //This is a layerMask with 8 only set to true
+        int layerMask = 1 << 8;
+        
+        //Check if the vehicle hits any obstacle within its minimum distance to avoid
+        if(Physics.SphereCast(transform.position, avoidanceRadius, transform.forward, out RaycastHit hit, minimumAvoidanceDistance, layerMask))
+        {
+            //Get the normal of the hit point, since this is the vector perpendicular, the resultant of this..
+            Vector3 hitNormal = hit.normal;
 
+            //Don't want to move in the y-space
+            hitNormal.y = 0;
+
+            //...will point to the direction AWAY from the obstacle
+            direction = transform.forward + hitNormal * force;
+        }
     }
 }
